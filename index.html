@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Label Check: compare an alcohol label with its application</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to the main content</a>
+
+  <header class="top">
+    <div class="wrap top-inner">
+      <div>
+        <h1>Label Check</h1>
+        <p class="tagline">Checks an alcohol label picture against its application.</p>
+      </div>
+      <p id="engine" class="engine" role="status">Getting the label reader ready. The first time takes about 10 seconds.</p>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <div class="tabs" role="tablist" aria-label="How many labels?">
+      <button role="tab" id="tab-one" aria-controls="panel-one" aria-selected="true">Check one label</button>
+      <button role="tab" id="tab-many" aria-controls="panel-many" aria-selected="false" tabindex="-1">Check many labels</button>
+    </div>
+
+    <!-- ONE LABEL -->
+    <section id="panel-one" role="tabpanel" aria-labelledby="tab-one">
+      <div class="row-between">
+        <h2>Check one label</h2>
+        <label class="example">
+          <span>Not sure where to start?</span>
+          <select id="example" aria-label="Load an example label"><option value="">Load an example…</option></select>
+        </label>
+      </div>
+
+      <form id="one-form" class="card" novalidate>
+        <div class="step">
+          <h3>1. Add the label picture</h3>
+          <label class="drop" id="one-drop">
+            <input type="file" id="one-file" accept="image/*">
+            <span class="drop-text" id="one-drop-text">Choose a picture, or drag one here</span>
+            <img id="one-preview" alt="Preview of the chosen label" hidden>
+          </label>
+        </div>
+
+        <div class="step">
+          <h3>2. Type in what the application says</h3>
+          <fieldset class="segmented">
+            <legend>Type of drink</legend>
+            <label><input type="radio" name="type" value="spirits" checked><span>Distilled spirits</span></label>
+            <label><input type="radio" name="type" value="wine"><span>Wine</span></label>
+            <label><input type="radio" name="type" value="beer"><span>Beer or malt beverage</span></label>
+          </fieldset>
+          <div class="fields">
+            <label>Brand name<input name="brand" autocomplete="off" placeholder="Old Tom Distillery"></label>
+            <label>Class or type<input name="classType" autocomplete="off" placeholder="Kentucky Straight Bourbon Whiskey"></label>
+            <label>Alcohol content<input name="abv" autocomplete="off" placeholder="45% Alc./Vol. (90 Proof)"></label>
+            <label>Net contents<input name="net" autocomplete="off" placeholder="750 mL"></label>
+            <label class="wide">Bottler or producer, with address<input name="producer" autocomplete="off" placeholder="Distilled and bottled by Old Tom Distillery, Bardstown, Kentucky"></label>
+            <label class="wide">Country of origin <span class="hint">Only for imports. Leave blank if made in the U.S.</span><input name="country" autocomplete="off" placeholder="France"></label>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="primary" id="one-go">Check this label</button>
+          <button type="reset" class="quiet" id="one-reset">Start over</button>
+        </div>
+      </form>
+
+      <div id="one-result" aria-live="polite"></div>
+    </section>
+
+    <!-- MANY LABELS -->
+    <section id="panel-many" role="tabpanel" aria-labelledby="tab-many" hidden>
+      <div class="row-between">
+        <h2>Check many labels at once</h2>
+        <button type="button" class="secondary" id="many-sample">Try the sample batch</button>
+      </div>
+
+      <div class="card">
+        <div class="step">
+          <h3>1. Add all the label pictures</h3>
+          <label class="drop" id="many-drop">
+            <input type="file" id="many-files" accept="image/*" multiple>
+            <span class="drop-text" id="many-files-text">Choose pictures, or drag them here</span>
+          </label>
+        </div>
+        <div class="step">
+          <h3>2. Add the spreadsheet</h3>
+          <p class="help">One row per label. The <strong>filename</strong> column says which picture the row belongs to.
+            <a href="#" id="template-link">Download a blank spreadsheet</a> to see the columns.</p>
+          <label class="drop small" id="csv-drop">
+            <input type="file" id="many-csv" accept=".csv,text/csv">
+            <span class="drop-text" id="many-csv-text">Choose the spreadsheet (.csv), or drag it here</span>
+          </label>
+        </div>
+        <p id="many-problem" class="problem" role="alert" hidden></p>
+        <div class="actions">
+          <button type="button" class="primary" id="many-go" disabled>Check all labels</button>
+          <button type="button" class="quiet" id="many-stop" hidden>Stop</button>
+        </div>
+      </div>
+
+      <div id="many-result" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Prototype. Pictures are read on this computer and are never uploaded. Results are a helper for a reviewer, not a decision.</p>
+  </footer>
+
+  <script src="vendor/tesseract.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
