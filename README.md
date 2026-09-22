@@ -1,118 +1,254 @@
-# **Take-Home Project: AI-Powered Alcohol Label Verification App**
+# Label Check
 
-## **Project Background & Stakeholder Context**
+**What this is:** a simple tool that looks at a picture of an alcohol label and checks it against
+what was typed on the application (brand name, alcohol %, warning text, etc.), the same way a
+reviewer does by eye today — but faster, and without the boring "does this number match that
+number" part.
 
-*The following document contains notes from our discovery sessions with the Compliance Division, along with technical requirements for the prototype. We've included stakeholder feedback to give you context on how this tool will be used.*
+You don't need to know how to code to run this. Just follow the steps below in order.
 
-### **Interview Notes: Sarah Chen, Deputy Director of Label Compliance**
+---
 
-*Conducted Tuesday, 3:15 PM — Sarah was running late from her daughter's school play rehearsal*
+## What it actually does
 
-"Thanks for meeting with me. Sorry about the delay—my daughter's playing the lead in her school's production of *Annie*next week and rehearsals have been crazy. Anyway, let me tell you about what we're dealing with here.
+Think of it like a very fast, very literal assistant sitting next to a reviewer:
 
-So the TTB reviews about 150,000 label applications a year. Our team of 47 agents handles all of them. Back in the 80s—before my time—they actually had over 100 agents, but budget cuts, you know how it goes. We've been doing things basically the same way since the COLA system went online in 2003. That was a big upgrade from paper forms, believe it or not.
+- You give it a **picture of a label** and **what the paperwork says** (either typed in by hand,
+  or as a spreadsheet for a whole stack of labels at once).
+- It reads the text off the picture and compares it, field by field.
+- For each thing it checks, it tells you one of three things:
+  - ✅ **Matches** — good to go
+  - ⚠️ **Take a look** — close, but a human should double check (e.g., a possible misspelling)
+  - ❌ **Does not match** — a real difference was found
 
-The actual review process is pretty straightforward. An agent pulls up an application, looks at the label artwork, and checks that what's on the label matches what's in the application. Brand name matches? Check. ABV is correct? Check. Government warning is there? Check. It takes maybe 5-10 minutes per application for a simple one, longer if there are issues.
+It never auto-approves or auto-rejects anything on its own. It's a helper, not a decision-maker.
 
-Here's the thing though—and this is what got leadership interested in AI—a lot of what we do is just... matching. Like literally just making sure the number on the form is the same as the number on the label. My agents spend half their day doing what's essentially data entry verification. It's not that they can't do more complex analysis, it's that they're drowning in routine stuff.
+**Two ways to use it:**
+1. **Check one label** — upload one picture, type in the application details, get an instant answer.
+2. **Check many labels** — upload a whole folder of label pictures plus one spreadsheet listing
+   the application details for each, and it works through all of them for you, with a results
+   table you can filter and download.
 
-Oh, I should mention—we tried a pilot with the scanning vendor last year. Disaster. The system would take 30, 40 seconds sometimes to process a single label. Our agents just went back to doing it by eye because they could do five labels in the time it took the machine to do one. **If we can't get results back in about 5 seconds, nobody's going to use it.** We learned that the hard way.
+---
 
-What else... The agents really vary in their tech comfort level. Dave's been here since the Clinton administration and still prints his emails. Meanwhile, Jenny's fresh out of college and probably could have built this tool herself. We need something **my mother could figure out**—she's 73 and just learned to video call her grandkids last year, if that gives you a benchmark. Half our team is over 50. Clean, obvious, no hunting for buttons.
+## Setup (one-time)
 
-One more thing that came up in our last team meeting—during peak season, we get these big importers who dump 200, 300 label applications on us at once. Right now we literally have to process them one at a time. If there was some way to **handle batch uploads**, that would be huge. Janet from our Seattle office has been asking about this for years."
+You only need to do this once per computer.
 
-### **Interview Notes: Marcus Williams, IT Systems Administrator**
+1. **Install Node.js.** This is the free program that lets the app run. Go to
+   [nodejs.org](https://nodejs.org), download the version marked **LTS**, and install it like any
+   normal program (click through the installer).
+2. **Get the project folder onto your computer.** Unzip the project folder you were given
+   (or `git clone` it if you're using GitHub — see below).
+3. **Open a terminal in that folder.**
+   - In VS Code: open the folder (**File → Open Folder...**), then open the built-in terminal
+     (**Terminal → New Terminal**).
+   - Or on Mac/Windows, open Terminal/Command Prompt and `cd` into the folder.
+4. **Install what the app needs** by typing:
+   ```bash
+   npm install
+   ```
+   This downloads the "reading" engine (it reads text out of pictures) and takes a minute or two.
+   You only need to do this once, unless you delete the folder and start over.
 
-*Coffee chat, Thursday morning*
+---
 
-"Sarah probably gave you the business side. Let me fill you in on some of the technical landscape.
+## Running it
 
-Our current infrastructure is... well, it's government infrastructure, let's leave it at that. We're on Azure now after the migration in 2019. That was a whole thing—don't get me started on the FedRAMP certification process. Took 18 months just for the paperwork.
+Every time you want to use the app:
 
-The COLA system is built on .NET, though there's been talk about modernizing it for years. We had a contractor come in last summer to do an assessment and they quoted us $4.2 million for a full rebuild. That went nowhere, obviously.
-
-For this prototype, we're not looking to integrate with COLA directly—that's a whole different beast with its own authorization requirements. Think of this as a standalone proof-of-concept that could potentially inform future procurement decisions. If it works well, maybe we look at how to incorporate it into the workflow. But that's years away, realistically.
-
-Security-wise, we'd need to be careful with any production deployment—there's PII considerations, document retention policies, the usual federal compliance stuff. But for a prototype? Just don't do anything crazy. We're not storing anything sensitive for this exercise.
-
-Oh, and our network blocks outbound traffic to a lot of domains, so keep that in mind if you're thinking about cloud APIs. During the scanning vendor pilot, half their features didn't work because our firewall blocked connections to their ML endpoints. Classic."
-
-### **Interview Notes: Dave Morrison, Senior Compliance Agent (28 years)**
-
-*Brief hallway conversation*
-
-"Look, I'll be honest, I've seen a lot of these 'modernization' projects come and go. Remember the automated phone system they put in back in 2008? Supposed to reduce call volume. We ended up with more calls because nobody could figure out how to navigate it.
-
-The thing about label review is there's nuance. You can't just pattern match everything. Like, I had one last week where the brand name was 'STONE'S THROW' on the label but 'Stone's Throw' in the application. Technically a mismatch? Sure. But it's obviously the same thing. You need judgment.
-
-That said, I'm not against new tools. If something can help me get through my queue faster, great. Just don't make my life harder in the process. I spend enough time fighting with COLA as it is."
-
-### **Interview Notes: Jenny Park, Junior Compliance Agent (8 months)**
-
-*Teams call, Friday afternoon*
-
-"I'm so excited you're working on this! When I started here, I was kind of shocked at how manual everything is. Like, I literally have a printed checklist on my desk that I go through for every label. Brand name—check with my eyes. ABV—check with my eyes. Warning statement—check with my eyes. It's 2024!
-
-The one thing I'd say is the warning statement check is actually trickier than it sounds. It has to be **exact**. Like, word-for-word, and the 'GOVERNMENT WARNING:' part has to be in all caps and bold. Sarah probably mentioned this but people try to get creative with the warning all the time. Smaller font, different wording, burying it in tiny text. I caught one last month where they used 'Government Warning' in title case instead of all caps. Rejected.
-
-Also—and this is maybe out of scope for a prototype—but it would be amazing if the tool could handle images that aren't perfectly shot. I've seen labels that are photographed at weird angles, or the lighting is bad, or there's glare on the bottle. Right now if an agent can't read the label they just reject it and ask for a better image. But if AI could handle some of that..."
-
-## **Technical Requirements**
-
-You are free to use any programming languages, frameworks, or libraries you prefer. We want to see what kind of engineering, design, and integration decisions you make.
-
-## **Additional Context**
-
-### **About TTB Label Requirements**
-
-For reference, TTB requires specific information on alcohol beverage labels. The exact requirements vary by beverage type (beer, wine, distilled spirits) but common elements include:
-
-- Brand name
-- Class/type designation
-- Alcohol content (with some exceptions for certain wine/beer)
-- Net contents
-- Name and address of bottler/producer
-- Country of origin for imports
-- **Government Health Warning Statement** (mandatory on all alcohol beverages)
-
-We encourage you to review TTB's guidelines at ttb.gov for additional context on label requirements.
-
-### **Sample Label**
-
-Your app should handle labels containing information like the example below:
-
-**Example Distilled Spirits Label Fields:**
-
-- Brand Name: "OLD TOM DISTILLERY"
-- Class/Type: "Kentucky Straight Bourbon Whiskey"
-- Alcohol Content: "45% Alc./Vol. (90 Proof)"
-- Net Contents: "750 mL"
-- Government Warning: \[Standard government warning text\]
-
-*We encourage you to create or source additional test labels—AI image generation tools work well for this.*
-
-## **Deliverables**
-
-1. **Source Code Repository** (GitHub or similar)
-   - All source code
-   - README with setup and run instructions
-   - Brief documentation of approach, tools used, assumptions made
-2. **Deployed Application URL**
-   - Working prototype we can access and test
-
-## **Evaluation Criteria**
-
-- Correctness and completeness of core requirements
-- Code quality and organization
-- Appropriate technical choices for the scope
-- User experience and error handling
-- Attention to requirements
-- Creative problem-solving
-
-We understand this is time-constrained. A working core application with clean code is preferred over ambitious but incomplete features. Document any trade-offs or limitations.
-
-*Questions? Reach out for clarification—though we also value how you fill in gaps independently.*
-
-Good luck!
+```bash
+npm start
 ```
+
+Wait a few seconds — it'll print something like:
+```
+Label Check is running at http://localhost:8080
+```
+
+Copy that link into your web browser (or hold Cmd/Ctrl and click it in the terminal). The app
+opens in your browser. That's it — you're running it locally on your own computer.
+
+To stop it later, click back into the terminal and press `Ctrl+C`.
+
+**First time using it?** Click the **"Load an example"** dropdown (single-label mode) or
+**"Try the sample batch"** button (many-labels mode) to see it work instantly with made-up test
+labels — no need to find your own files first.
+
+---
+
+## Getting a link you can share (a "deployed" version)
+
+Running it on your own computer only works for you. If you need a public web link others can
+open (for example, to submit for review), you need to publish it online. The easiest free way:
+
+1. Create a free account at [github.com](https://github.com) if you don't have one.
+2. Create a **new, empty repository** there (click **New repository**, give it a name, don't
+   add a README, click **Create**).
+3. Back in your terminal, inside the project folder, run:
+   ```bash
+   git init
+   git add .
+   git commit -m "Label Check prototype"
+   git branch -M main
+   git remote add origin https://github.com/<your-username>/<your-repo-name>.git
+   git push -u origin main
+   ```
+   (Replace `<your-username>` and `<your-repo-name>` with your actual GitHub username and the
+   name you picked.)
+4. On GitHub, go to your repository's **Settings → Pages**, and under "Build and deployment,"
+   set **Source** to **GitHub Actions**. This project already includes the automation needed to
+   build and publish itself — you don't need to write anything.
+5. Wait a couple of minutes (check the **Actions** tab on GitHub to watch it work), then your
+   app is live at:
+   ```
+   https://<your-username>.github.io/<your-repo-name>/
+   ```
+   That's the link you can share.
+
+**Heads up:** this kind of link contains your GitHub username, and your repository will be
+public. If you'd rather not reveal your GitHub account, services like Netlify or Vercel can
+publish the same project under a link that doesn't include your username — ask if you'd like
+help setting that up instead.
+
+---
+
+## Our approach, in plain terms
+
+The problem: a human reviewer currently looks at a label picture and an application side by
+side, and manually checks that a handful of things match — brand name, alcohol percentage,
+bottle size, the government warning text, and so on. It's tedious, repetitive work, and when
+someone gets a stack of 200+ labels at once, it's slow going one at a time.
+
+**What we built instead:**
+
+1. **The picture gets cleaned up first.** Photos aren't always perfect — bad lighting, glare,
+   a slight tilt. Before reading the text, the app automatically brightens/adjusts the image to
+   make the text easier to pick out, similar to how you might squint or adjust your phone's
+   brightness to read something blurry.
+2. **A "reading" engine turns the picture into text.** This part (called OCR — optical
+   character recognition) is what looks at the picture and figures out what words are on it.
+3. **The text is compared to what's on the application**, field by field. Because photos and
+   OCR aren't perfect, the comparison isn't just "identical or not" — it understands things like:
+   - `STONE'S THROW` and `Stone's Throw` are the same brand, just different capitalization —
+     that's a match, not an error.
+   - `45%` and `90 Proof` mean the same alcohol content — the tool does that math for you.
+   - A single misread letter (common on a blurry photo) gets flagged as "take a look" rather
+     than an automatic rejection, since it's more likely the camera's fault than a real mismatch.
+   - The **government warning** is the one place we're strict: it must be word-for-word, in all
+     capital letters, and appear bold. Any real difference there is flagged as a mismatch.
+4. **If a photo is hard to read**, the app automatically tries again with different image
+   adjustments before giving up and asking a human to look.
+5. **For a whole batch of labels**, the app works through multiple images at the same time (like
+   having several reviewers working in parallel) so it doesn't slow to a crawl on a big batch.
+
+**Why it runs entirely on your computer, with no internet connection required:** the tool was
+built to work even behind strict company firewalls that block outside connections (a real
+problem with a previous vendor's tool, which broke because their servers got blocked).
+Everything — reading the picture, checking it, comparing — happens right there in your browser.
+Nothing gets uploaded anywhere.
+
+---
+
+## Tools used, and why
+
+| Tool | What it's for | Why this one |
+|---|---|---|
+| **Node.js** | Lets the app run on your computer or a server | Free, standard, works everywhere |
+| **Tesseract.js** | Reads text out of pictures (OCR) | Runs entirely in the browser — no cloud service, no internet connection, no per-image cost |
+| **Plain HTML/CSS/JavaScript** | Builds the actual screen you interact with | Keeps the whole thing simple and dependency-light, so it's easy to read, change, and deploy — no complicated framework required |
+| **GitHub Pages / GitHub Actions** | Publishes the app to a public link automatically | Free, and it re-publishes itself every time you update the code |
+
+Nothing here needs a paid account, a cloud subscription, or a company API key.
+
+---
+
+## Assumptions we made
+
+- The application's details are either typed in by hand (for one label) or listed in a
+  spreadsheet (for a batch) — there's no live connection to any government filing system.
+- Each picture shows the whole label in one shot (not separate front/back photos).
+- Labels are in English.
+- The tool is a **helper for a human reviewer**, not a replacement — it never finalizes an
+  approval or rejection by itself.
+
+---
+
+## Known limitations (things to keep in mind)
+
+- **Speed depends on your computer.** A typical label is checked in a few seconds; a harder,
+  blurrier photo can take a bit longer since it gets a second attempt.
+- **Very blurry, tilted, or oddly-lit photos** may still get flagged as "take a look" instead of
+  a clean answer — this is intentional (better to ask a human than guess wrong), but it means
+  quality photos give the best results.
+- **The tool checks wording and numbers, not legal/design details** — like font size rules,
+  where exactly the warning sits on the bottle, or whether a specific class/type name is legally
+  valid. Those still need a trained reviewer.
+- **Large batches (a few hundred labels)** run right there in your browser tab — keep the tab
+  open while it works. There's a **Stop** button if you need to pause partway through, and a
+  **Download results** button so you don't lose your place.
+
+---
+
+## If something's not working
+
+- **"The reading engine files are missing"** → run `npm install`, then `npm start` again.
+- **The page looks stuck on "Getting ready"** → open your browser's developer tools (press F12),
+  check the Console tab for red error text, and check that you ran `npm install` successfully.
+- **Don't double-click `index.html` to open it.** Always start it with `npm start` and open the
+  `localhost` link it gives you — browsers block part of the app from working if you just open
+  the file directly.
+- **Nothing updating after you change a file?** Try a hard refresh in your browser
+  (`Ctrl+Shift+R` on Windows/Linux, `Cmd+Shift+R` on Mac) — browsers sometimes hang onto an old
+  cached copy of the page.
+
+---
+
+## For the more technically curious
+
+<details>
+<summary>Click to expand: what's checked per type of drink, and how the code is organized</summary>
+
+### What's checked, by type of drink
+
+Requirements differ slightly by drink type (following U.S. TTB rules, 27 CFR Parts 4, 5, 7, 16):
+
+| | Distilled spirits | Wine | Beer / malt beverage |
+|---|---|---|---|
+| Brand, class/type, bottler name & address | required | required | required |
+| Alcohol content | required (proof optional; if both shown, proof must be 2× the percent) | required (a "table wine"/"light wine" label can replace the number for 7–14% wine) | optional (only required if alcohol comes from added flavors; "ABV" isn't an allowed abbreviation) |
+| Net contents | metric units | metric units | U.S. units required (fl. oz., pints); metric-only is flagged |
+| Country of origin | checked only if the application lists one | same | same |
+| Government warning | word-for-word, "GOVERNMENT WARNING:" in capitals and bold | same | same |
+
+### Project layout
+
+```
+src/index.html, src/css/styles.css   the page you see
+src/js/app.js       the two screens (one label / many labels) and results view
+src/js/engine.js    runs the OCR reading, retries on hard photos
+src/js/prep.js      image clean-up before reading
+src/js/checks.js    the actual field-by-field comparison logic
+src/js/rules.js     TTB rules per drink type, and the required warning text
+src/js/stroke.js    detects whether the warning heading looks bold
+src/js/text.js      fuzzy text-matching helpers (handles typos, capitalization, etc.)
+src/js/csv.js       spreadsheet reading for batch mode
+samples/            made-up test labels + the script that generated them
+tests/              automated tests, checked against real OCR output
+scripts/            build script and a small local server
+```
+
+### Testing with your own labels
+
+`samples/generate_samples.py` shows how the sample test labels were made (using Python).
+AI image generators also work well for creating extra test labels if you want more variety.
+
+For batch mode, your spreadsheet needs a `filename` column matching each picture's file name.
+Other accepted column names: `brand_name`, `class_type`, `alcohol_content`, `net_contents`,
+`bottler`, `country_of_origin`, `beverage_type` (spirits, wine, or beer).
+
+Other useful commands:
+- `npm test` — runs the automated test suite
+- `npm run build` — builds the `dist` folder (what actually gets deployed)
+
+</details>
