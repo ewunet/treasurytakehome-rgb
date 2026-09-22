@@ -1,18 +1,17 @@
 {
-    "name": "label-check",
-    "version": "0.1.0",
-    "description": "Prototype: checks alcohol label pictures against application data, entirely in the browser.",
-    "private": true,
-    "type": "module",
-    "scripts": {
-      "build": "node scripts/build.mjs",
-      "start": "node scripts/build.mjs && node scripts/serve.mjs",
-      "test": "node --test"
-    },
-    "dependencies": {
-      "@tesseract.js-data/eng": "^1.0.0",
-      "tesseract.js": "^5.1.1"
-    },
-    "engines": { "node": ">=18" }
-  }
-  
+  "name": "label-check",
+  "version": "0.1.0",
+  "description": "Prototype: checks alcohol label pictures against application data, entirely in the browser.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "start": "node scripts/build.mjs && node scripts/serve.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@tesseract.js-data/eng": "^1.0.0",
+    "tesseract.js": "^5.1.1"
+  },
+  "engines": { "node": ">=18" }
+}
