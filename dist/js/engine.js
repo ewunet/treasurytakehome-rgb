@@ -7,6 +7,17 @@ import { checkLabel, score } from './checks.js';
 
 const url = (path) => new URL(path, document.baseURI).href;
 
+// Per-stage timing totals (ms), for finding slow steps. Read with getStageTimings() in the console.
+const stageTimings = {};
+function record(stage, value) {
+  const t = (stageTimings[stage] ||= { count: 0, total: 0 });
+  t.count++; t.total += value;
+}
+export function getStageTimings() {
+  return Object.fromEntries(Object.entries(stageTimings).map(([k, t]) => [k, { count: t.count, avg: +(t.total / t.count).toFixed(1) }]));
+}
+export function resetStageTimings() { for (const k of Object.keys(stageTimings)) delete stageTimings[k]; }
+
 /** Hands out workers one at a time so several labels can be read in parallel. */
 class Pool {
   constructor(workers) { this.free = [...workers]; this.waiting = []; this.size = workers.length; }
