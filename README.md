@@ -74,33 +74,31 @@ To stop it later, click back into the terminal and press `Ctrl+C`.
 
 **First time using it?** Click the **"Load an example"** dropdown (single-label mode) or
 **"Try the sample batch"** button (many-labels mode) to see it work instantly with made-up test
-labels — no need to find your own files first.
+labels, so no need to find your own files first.
 
 ---
 
-## Our approach, in plain terms
+## The approach
 
 The problem: a human reviewer currently looks at a label picture and an application side by
 side, and manually checks that a handful of things match — brand name, alcohol percentage,
 bottle size, the government warning text, and so on. It's tedious, repetitive work, and when
 someone gets a stack of 200+ labels at once, it's slow going one at a time.
 
-**What we built instead:**
+**The tool:**
 
-1. **The picture gets cleaned up first.** Photos aren't always perfect — bad lighting, glare,
-   a slight tilt. Before reading the text, the app automatically brightens/adjusts the image to
+1. **The picture gets cleaned up first.** Before reading the text, the app automatically brightens/adjusts the image to
    make the text easier to pick out, similar to how you might squint or adjust your phone's
    brightness to read something blurry.
 2. **A "reading" engine turns the picture into text.** This part (called OCR — optical
    character recognition) is what looks at the picture and figures out what words are on it.
 3. **The text is compared to what's on the application**, field by field. Because photos and
-   OCR aren't perfect, the comparison isn't just "identical or not" — it understands things like:
-   - `STONE'S THROW` and `Stone's Throw` are the same brand, just different capitalization —
-     that's a match, not an error.
-   - `45%` and `90 Proof` mean the same alcohol content — the tool does that math for you.
+   OCR aren't perfect, the comparison isn't just "identical or not," it understands things like:
+   - `STONE'S THROW` and `Stone's Throw` are the same brand, just different capitalization. Considered a match, not an error.
+   - `45%` and `90 Proof` mean the same alcohol content so the tool does that math for you.
    - A single misread letter (common on a blurry photo) gets flagged as "take a look" rather
      than an automatic rejection, since it's more likely the camera's fault than a real mismatch.
-   - The **government warning** is the one place we're strict: it must be word-for-word, in all
+   - The **government warning** must be word-for-word, in all
      capital letters, and appear bold. Any real difference there is flagged as a mismatch.
 4. **If a photo is hard to read**, the app automatically tries again with different image
    adjustments before giving up and asking a human to look.
@@ -111,18 +109,17 @@ someone gets a stack of 200+ labels at once, it's slow going one at a time.
 
 ## Tools used, and why
 
-| Tool                              | What it's for                                    | Why this one                                                                                                                    |
-| --------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Node.js**                       | Lets the app run on your computer or a server    | Free, standard, works everywhere                                                                                                |
-| **Tesseract.js**                  | Reads text out of pictures (OCR)                 | Runs entirely in the browser — no cloud service, no internet connection, no per-image cost                                      |
-| **Plain HTML/CSS/JavaScript**     | Builds the actual screen you interact with       | Keeps the whole thing simple and dependency-light, so it's easy to read, change, and deploy — no complicated framework required |
-| **GitHub Pages / GitHub Actions** | Publishes the app to a public link automatically | Free, and it re-publishes itself every time you update the code                                                                 |
+| Tool                          | What it's for                                 | Why this one                                                                                                                    |
+| ----------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Node.js**                   | Lets the app run on your computer or a server | Free, standard, works everywhere                                                                                                |
+| **Tesseract.js**              | Reads text out of pictures (OCR)              | Runs entirely in the browser — no cloud service, no internet connection, no per-image cost                                      |
+| **Plain HTML/CSS/JavaScript** | Builds the actual screen you interact with    | Keeps the whole thing simple and dependency-light, so it's easy to read, change, and deploy — no complicated framework required |
 
 Nothing here needs a paid account, a cloud subscription, or a company API key.
 
 ---
 
-## Assumptions we made
+## Assumptions made
 
 - The application's details are either typed in by hand (for one label) or listed in a
   spreadsheet (for a batch) — there's no live connection to any government filing system.
@@ -144,17 +141,17 @@ Nothing here needs a paid account, a cloud subscription, or a company API key.
 
 **The number parsing is pattern-based.** ABV and net contents are pulled out with regular expressions looking for specific formats: a percentage, a proof number, a known unit like "fl oz" or "mL." A label that prints these in an unusual way — a range instead of a single number, an abbreviation I didn't anticipate, or the number baked into a logo instead of live text — comes back as "not found," which is a false fail rather than a false pass.
 
-**No persistence.** Everything runs in the browser tab and nothing gets uploaded anywhere. This means there's no history of past runs and no recovery if the tab closes mid-batch-you'd have to re-run the batch and re-export the CSV. Matching a label photo to its application row is also done by exact filename, so a renamed or mistyped filename quietly shows up as "no matching row" instead of getting matched.
+**No persistence.** Everything runs in the browser tab and nothing gets uploaded anywhere. This means there's no history of past runs and no recovery if the tab closes mid-batch you'd have to re-run the batch and re-export the CSV. Matching a label photo to its application row is also done by exact filename, so a renamed or mistyped filename quietly shows up as "no matching row" instead of getting matched.
 
-**Scale is untested past a few hundred images.** I tested this comfortably at 300 labels. It's all client-side, single-tab, CPU-bound OCR with no server component, so I'd expect it to keep working at higher volumes, just more slowly — but I haven't verified where it actually starts straining browser memory, or how gracefully it'd recover from a crash partway through a much bigger batch.
+**Scale is untested past a few hundred images.** I tested this comfortably at 300 labels. It's all client-side, single-tab, CPU-bound OCR with no server component, so I'd expect it to keep working at higher volumes, just more slowly. However I haven't verified where it actually starts straining browser memory, or how gracefully it'd recover from a crash partway through a much bigger batch.
 
 ---
 
 ## Ideas for the future
 
-- **Convenient application info for checking one image** Currently user types in application info, next feature would be an option to extract it directly from application
-- **Thorough image cleanup passes** matching could be closer to accurate, could consider tilted photos or blurry photos
-- **Increase usability** on the "Checking multiple features tab" adding a feature to drag and drop folders of labels, instead of dragging and dropping the images themselves.
+- **Convenient application info for checking one image** Currently user types in application info, next upgrade would be an option to extract it directly from application. Can upload as a PDF or Word file, or can communicate directly with government systems.
+- **Thorough image cleanup passes** more accurate matching could consider tilted photos or blurry photos
+- **Increase usability** on the "Checking multiple features tab" adding a feature to drag and drop folders, instead of dragging and dropping the images themselves.
 
 ---
 
