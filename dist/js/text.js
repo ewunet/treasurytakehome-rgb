@@ -53,14 +53,17 @@ export function normalizeWord(word) {
     if (!n.length || !h.length) return { score: 0, snippet: '' };
     const target = n.map((w) => w.norm).join('');
     let best = { score: 0, snippet: '' };
+    outer:
     for (let size = Math.max(1, n.length - 1); size <= n.length + 1; size++) {
       for (let i = 0; i + size <= h.length; i++) {
         const win = h.slice(i, i + size);
         const cand = win.map((w) => w.norm).join('');
-        // Cheap skip: lengths too different to beat the current best.
         if (Math.abs(cand.length - target.length) / Math.max(cand.length, target.length) > 1 - best.score) continue;
         const score = similarity(target, cand);
-        if (score > best.score) best = { score, snippet: win.map((w) => w.raw).join(' ') };
+        if (score > best.score) {
+          best = { score, snippet: win.map((w) => w.raw).join(' ') };
+          if (best.score >= 0.999) break outer;
+        }
       }
     }
     return best;
@@ -79,7 +82,10 @@ export function normalizeWord(word) {
     let total = 0;
     for (const word of n) {
       let best = 0;
-      for (const cand of h) best = Math.max(best, similarity(word.norm, cand.norm));
+      for (const cand of h) {
+        best = Math.max(best, similarity(word.norm, cand.norm));
+        if (best >= 0.999) break;
+      }
       if (best >= 0.8) total += best;
       else missing.push(word.raw.replace(/[,.;]+$/, ''));
     }

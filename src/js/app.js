@@ -1,7 +1,12 @@
 import { startEngine, engineSize, analyzeLabel } from './engine.js';
 import { checkLabel, STATUS_TEXT, OVERALL_TEXT } from './checks.js';
 import { parseCsv, rowsToApplications, pairFilesWithApplications, toCsv } from './csv.js';
+import { analyzeLabel, getStageTimings, resetStageTimings } from './engine.js';
+import { getStageTimings, resetStageTimings } from './engine.js'; //debugging 
 
+resetStageTimings();
+// ...your existing loop calling analyzeLabel(file, app) for all 300...
+console.log(getStageTimings());
 const $ = (sel, root = document) => root.querySelector(sel);
 const GLYPH = { pass: '✓', review: '!', fail: '✕', na: '–', info: 'i' };
 

@@ -2,8 +2,7 @@
 
 **What this is:** a simple tool that looks at a picture of an alcohol label and checks it against
 what was typed on the application (brand name, alcohol %, warning text, etc.), the same way a
-reviewer does by eye today — but faster, and without the boring "does this number match that
-number" part.
+reviewer does by eye today, but faster
 
 You don't need to know how to code to run this. Just follow the steps below in order.
 
@@ -11,19 +10,20 @@ You don't need to know how to code to run this. Just follow the steps below in o
 
 ## What it actually does
 
-Think of it like a very fast, very literal assistant sitting next to a reviewer:
+Thinking of it like a very fast, very literal assistant sitting next to a reviewer:
 
 - You give it a **picture of a label** and **what the paperwork says** (either typed in by hand,
   or as a spreadsheet for a whole stack of labels at once).
 - It reads the text off the picture and compares it, field by field.
 - For each thing it checks, it tells you one of three things:
-  - ✅ **Matches** — good to go
-  - ⚠️ **Take a look** — close, but a human should double check (e.g., a possible misspelling)
-  - ❌ **Does not match** — a real difference was found
+  - ✅ **Matches** : good to go
+  - ⚠️ **Take a look** : close, but a human should double check (e.g., a possible misspelling)
+  - ❌ **Does not match** : a real difference was found
 
 It never auto-approves or auto-rejects anything on its own. It's a helper, not a decision-maker.
 
 **Two ways to use it:**
+
 1. **Check one label** — upload one picture, type in the application details, get an instant answer.
 2. **Check many labels** — upload a whole folder of label pictures plus one spreadsheet listing
    the application details for each, and it works through all of them for you, with a results
@@ -53,7 +53,7 @@ You only need to do this once per computer.
 
 ---
 
-## Running it
+## Running it locally
 
 Every time you want to use the app:
 
@@ -62,6 +62,7 @@ npm start
 ```
 
 Wait a few seconds — it'll print something like:
+
 ```
 Label Check is running at http://localhost:8080
 ```
@@ -74,42 +75,6 @@ To stop it later, click back into the terminal and press `Ctrl+C`.
 **First time using it?** Click the **"Load an example"** dropdown (single-label mode) or
 **"Try the sample batch"** button (many-labels mode) to see it work instantly with made-up test
 labels — no need to find your own files first.
-
----
-
-## Getting a link you can share (a "deployed" version)
-
-Running it on your own computer only works for you. If you need a public web link others can
-open (for example, to submit for review), you need to publish it online. The easiest free way:
-
-1. Create a free account at [github.com](https://github.com) if you don't have one.
-2. Create a **new, empty repository** there (click **New repository**, give it a name, don't
-   add a README, click **Create**).
-3. Back in your terminal, inside the project folder, run:
-   ```bash
-   git init
-   git add .
-   git commit -m "Label Check prototype"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/<your-repo-name>.git
-   git push -u origin main
-   ```
-   (Replace `<your-username>` and `<your-repo-name>` with your actual GitHub username and the
-   name you picked.)
-4. On GitHub, go to your repository's **Settings → Pages**, and under "Build and deployment,"
-   set **Source** to **GitHub Actions**. This project already includes the automation needed to
-   build and publish itself — you don't need to write anything.
-5. Wait a couple of minutes (check the **Actions** tab on GitHub to watch it work), then your
-   app is live at:
-   ```
-   https://<your-username>.github.io/<your-repo-name>/
-   ```
-   That's the link you can share.
-
-**Heads up:** this kind of link contains your GitHub username, and your repository will be
-public. If you'd rather not reveal your GitHub account, services like Netlify or Vercel can
-publish the same project under a link that doesn't include your username — ask if you'd like
-help setting that up instead.
 
 ---
 
@@ -142,22 +107,16 @@ someone gets a stack of 200+ labels at once, it's slow going one at a time.
 5. **For a whole batch of labels**, the app works through multiple images at the same time (like
    having several reviewers working in parallel) so it doesn't slow to a crawl on a big batch.
 
-**Why it runs entirely on your computer, with no internet connection required:** the tool was
-built to work even behind strict company firewalls that block outside connections (a real
-problem with a previous vendor's tool, which broke because their servers got blocked).
-Everything — reading the picture, checking it, comparing — happens right there in your browser.
-Nothing gets uploaded anywhere.
-
 ---
 
 ## Tools used, and why
 
-| Tool | What it's for | Why this one |
-|---|---|---|
-| **Node.js** | Lets the app run on your computer or a server | Free, standard, works everywhere |
-| **Tesseract.js** | Reads text out of pictures (OCR) | Runs entirely in the browser — no cloud service, no internet connection, no per-image cost |
-| **Plain HTML/CSS/JavaScript** | Builds the actual screen you interact with | Keeps the whole thing simple and dependency-light, so it's easy to read, change, and deploy — no complicated framework required |
-| **GitHub Pages / GitHub Actions** | Publishes the app to a public link automatically | Free, and it re-publishes itself every time you update the code |
+| Tool                              | What it's for                                    | Why this one                                                                                                                    |
+| --------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Node.js**                       | Lets the app run on your computer or a server    | Free, standard, works everywhere                                                                                                |
+| **Tesseract.js**                  | Reads text out of pictures (OCR)                 | Runs entirely in the browser — no cloud service, no internet connection, no per-image cost                                      |
+| **Plain HTML/CSS/JavaScript**     | Builds the actual screen you interact with       | Keeps the whole thing simple and dependency-light, so it's easy to read, change, and deploy — no complicated framework required |
+| **GitHub Pages / GitHub Actions** | Publishes the app to a public link automatically | Free, and it re-publishes itself every time you update the code                                                                 |
 
 Nothing here needs a paid account, a cloud subscription, or a company API key.
 
@@ -169,24 +128,33 @@ Nothing here needs a paid account, a cloud subscription, or a company API key.
   spreadsheet (for a batch) — there's no live connection to any government filing system.
 - Each picture shows the whole label in one shot (not separate front/back photos).
 - Labels are in English.
-- The tool is a **helper for a human reviewer**, not a replacement — it never finalizes an
-  approval or rejection by itself.
+- The tool is a helper for a human reviewer, not a replacement, it never finalizes an approval or rejection by itself.
 
 ---
 
-## Known limitations (things to keep in mind)
+# Limitations and trade-offs
 
-- **Speed depends on your computer.** A typical label is checked in a few seconds; a harder,
-  blurrier photo can take a bit longer since it gets a second attempt.
-- **Very blurry, tilted, or oddly-lit photos** may still get flagged as "take a look" instead of
-  a clean answer — this is intentional (better to ask a human than guess wrong), but it means
-  quality photos give the best results.
+**It's only as good as the OCR.** Every check in this app starts from text that Tesseract read off a photo, so if the OCR misreads a word, everything downstream inherits that mistake. I added two image-cleanup passes, one is a a plain contrast stretch, and the other is a background-flattening pass for uneven lighting. The app automatically retries with the second one if the first doesn't produce a clean pass. That helps with lighting problems, but it doesn't fix an actual tilted photo. I never built a de-skew step, so a label photographed at a noticeable angle is likely to OCR poorly no matter which cleanup pass runs.
+
+**English only.** The OCR engine is loaded with just the English language pack. Most of the app's own checks (ABV, net contents, brand name) will still hold up reasonably on imported labels, since those are often numbers or Roman-alphabet brand names, but a label with real body text in another language probably won't OCR cleanly.
+
 - **The tool checks wording and numbers, not legal/design details** — like font size rules,
   where exactly the warning sits on the bottle, or whether a specific class/type name is legally
   valid. Those still need a trained reviewer.
-- **Large batches (a few hundred labels)** run right there in your browser tab — keep the tab
-  open while it works. There's a **Stop** button if you need to pause partway through, and a
-  **Download results** button so you don't lose your place.
+
+**The number parsing is pattern-based.** ABV and net contents are pulled out with regular expressions looking for specific formats: a percentage, a proof number, a known unit like "fl oz" or "mL." A label that prints these in an unusual way — a range instead of a single number, an abbreviation I didn't anticipate, or the number baked into a logo instead of live text — comes back as "not found," which is a false fail rather than a false pass.
+
+**No persistence.** Everything runs in the browser tab and nothing gets uploaded anywhere. This means there's no history of past runs and no recovery if the tab closes mid-batch-you'd have to re-run the batch and re-export the CSV. Matching a label photo to its application row is also done by exact filename, so a renamed or mistyped filename quietly shows up as "no matching row" instead of getting matched.
+
+**Scale is untested past a few hundred images.** I tested this comfortably at 300 labels. It's all client-side, single-tab, CPU-bound OCR with no server component, so I'd expect it to keep working at higher volumes, just more slowly — but I haven't verified where it actually starts straining browser memory, or how gracefully it'd recover from a crash partway through a much bigger batch.
+
+---
+
+## Ideas for the future
+
+- **Convenient application info for checking one image** Currently user types in application info, next feature would be an option to extract it directly from application
+- **Thorough image cleanup passes** matching could be closer to accurate, could consider tilted photos or blurry photos
+- **Increase usability** on the "Checking multiple features tab" adding a feature to drag and drop folders of labels, instead of dragging and dropping the images themselves.
 
 ---
 
@@ -213,13 +181,13 @@ Nothing here needs a paid account, a cloud subscription, or a company API key.
 
 Requirements differ slightly by drink type (following U.S. TTB rules, 27 CFR Parts 4, 5, 7, 16):
 
-| | Distilled spirits | Wine | Beer / malt beverage |
-|---|---|---|---|
-| Brand, class/type, bottler name & address | required | required | required |
-| Alcohol content | required (proof optional; if both shown, proof must be 2× the percent) | required (a "table wine"/"light wine" label can replace the number for 7–14% wine) | optional (only required if alcohol comes from added flavors; "ABV" isn't an allowed abbreviation) |
-| Net contents | metric units | metric units | U.S. units required (fl. oz., pints); metric-only is flagged |
-| Country of origin | checked only if the application lists one | same | same |
-| Government warning | word-for-word, "GOVERNMENT WARNING:" in capitals and bold | same | same |
+|                                           | Distilled spirits                                                      | Wine                                                                               | Beer / malt beverage                                                                              |
+| ----------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Brand, class/type, bottler name & address | required                                                               | required                                                                           | required                                                                                          |
+| Alcohol content                           | required (proof optional; if both shown, proof must be 2× the percent) | required (a "table wine"/"light wine" label can replace the number for 7–14% wine) | optional (only required if alcohol comes from added flavors; "ABV" isn't an allowed abbreviation) |
+| Net contents                              | metric units                                                           | metric units                                                                       | U.S. units required (fl. oz., pints); metric-only is flagged                                      |
+| Country of origin                         | checked only if the application lists one                              | same                                                                               | same                                                                                              |
+| Government warning                        | word-for-word, "GOVERNMENT WARNING:" in capitals and bold              | same                                                                               | same                                                                                              |
 
 ### Project layout
 
@@ -248,6 +216,7 @@ Other accepted column names: `brand_name`, `class_type`, `alcohol_content`, `net
 `bottler`, `country_of_origin`, `beverage_type` (spirits, wine, or beer).
 
 Other useful commands:
+
 - `npm test` — runs the automated test suite
 - `npm run build` — builds the `dist` folder (what actually gets deployed)
 

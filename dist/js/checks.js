@@ -180,7 +180,27 @@ export function checkWarning(text, boldInfo = { verdict: 'unknown' }) {
 }
 
 // ---------- Put it together ----------
-export function checkLabel(app, text, boldInfo) {
+// export function checkLabel(app, text, boldInfo) {
+//   const bev = BEVERAGES[app.type] || BEVERAGES.spirits;
+//   const fields = [
+//     textField('brand', 'Brand name', app.brand, text),
+//     textField('classType', 'Class / type', app.classType, text, { loose: true }),
+//     abvField(app, text, bev),
+//     netField(app, text, bev),
+//     textField('producer', 'Bottler name and address', app.producer, text, { loose: true }),
+//     textField('country', 'Country of origin', app.country, text, { required: false, loose: true, naMessage: 'Not checked. Leave blank for U.S.-made products; fill in for imports.' }),
+//   ];
+//   if (app.type === 'wine') {
+//     const has = /sulfites?/i.test(text);
+//     fields.push(row('sulfites', 'Sulfite statement', '', has ? 'Contains sulfites' : '', 'info',
+//       has ? 'A sulfite statement is on the label.' : 'No sulfite statement seen. It is only required if the wine has 10 ppm or more sulfur dioxide.'));
+//   }
+//   const warning = checkWarning(text, boldInfo);
+//   const status = worst([...fields.map((f) => f.status), warning.status]);
+//   return { status, fields, warning };
+// }
+
+function checkLabelInner(app, text, boldInfo) {
   const bev = BEVERAGES[app.type] || BEVERAGES.spirits;
   const fields = [
     textField('brand', 'Brand name', app.brand, text),
@@ -198,6 +218,29 @@ export function checkLabel(app, text, boldInfo) {
   const warning = checkWarning(text, boldInfo);
   const status = worst([...fields.map((f) => f.status), warning.status]);
   return { status, fields, warning };
+}
+
+const timings = [];
+
+export function checkLabel(app, text, boldInfo) {
+  const start = performance.now();
+  const result = checkLabelInner(app, text, boldInfo);
+  timings.push(performance.now() - start);
+  return result;
+}
+
+export function getCheckLabelTimings() {
+  const total = timings.reduce((s, t) => s + t, 0);
+  return {
+    count: timings.length,
+    totalMs: Math.round(total),
+    avgMs: total / (timings.length || 1),
+    maxMs: Math.max(...timings, 0),
+  };
+}
+
+export function resetCheckLabelTimings() {
+  timings.length = 0;
 }
 
 /** Used to decide which OCR attempt is better: fewer problems wins. */
