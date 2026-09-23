@@ -3,6 +3,8 @@ import { toGray, stretch, flattenBackground, targetScale } from './prep.js';
 import { warningBoldInfo } from './stroke.js';
 import { checkLabel, score } from './checks.js';
 
+
+
 const url = (path) => new URL(path, document.baseURI).href;
 
 /** Hands out workers one at a time so several labels can be read in parallel. */
@@ -81,22 +83,41 @@ async function recognize(pool, canvas) {
     return { text: data.text || '', words };
   });
 }
-
 /**
  * Read one label and check it against its application.
  * Stops at the first clean pass; otherwise keeps the attempt with the fewest problems.
  */
 export async function analyzeLabel(file, app) {
+  const totalStart = performance.now();
   const pool = await startEngine();
+
+  const prepStart = performance.now();
   const prepared = await prepareImage(file);
+  record('prepare', performance.now() - prepStart);
+
   let best = null;
+  let variantsRun = 0;
   for (const clean of VARIANTS) {
+    variantsRun++;
+
+    const cleanStart = performance.now();
     const gray = clean(prepared.gray, prepared.width, prepared.height);
+    record('clean', performance.now() - cleanStart);
+
+    const recognizeStart = performance.now();
     const ocr = await recognize(pool, grayToCanvas(gray, prepared.width, prepared.height));
+    record('recognize', performance.now() - recognizeStart);
+
+    const boldStart = performance.now();
     const boldInfo = warningBoldInfo(gray, prepared.width, ocr.words);
+    record('boldInfo', performance.now() - boldStart);
+
     const attempt = { text: ocr.text, boldInfo, result: checkLabel(app, ocr.text, boldInfo) };
     if (!best || score(attempt.result) > score(best.result)) best = attempt;
     if (best.result.status === 'pass') break;
   }
+
+  record('variantsPerImage', variantsRun);
+  record('total', performance.now() - totalStart);
   return best;
 }
